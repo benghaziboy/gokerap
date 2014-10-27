@@ -2,6 +2,9 @@ package main
 
 import (
     "encoding/json"
+    "fmt"
+    "log"
+    "log/syslog"
     "net/http"
     "gokerap/rapper"
 )
@@ -24,6 +27,11 @@ func handleRappers(rwriter http.ResponseWriter, request *http.Request) {
 }   
 
 func main() {
+    logwriter, e := syslog.New(syslog.LOG_NOTICE, "go_log")
+    if e != nil {
+        fmt.Println("Hey Syslog")
+        log.SetOutput(logwriter)
+    }
     http.HandleFunc("/", handleIndex)
     http.HandleFunc("/rappers", handleRappers)
     http.ListenAndServe(":8080", nil)
