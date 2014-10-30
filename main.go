@@ -1,38 +1,35 @@
 package main
 
 import (
-    "encoding/json"
-    "fmt"
+    "flag"
+    "github.com/gorilla/mux"
     "log"
     "log/syslog"
     "net/http"
     "gokerap/rapper"
+    "gokerap/user"
 )
 
-type Route struct {
-    Name         string `json:"name"`
-    Description string `json:"description"`
-}
+var (
+    port = flag.String("port", ":8080", "HTTP port to listen on")
+)
 
-func handleIndex(w http.ResponseWriter, request *http.Request) {
-    r := &Route{"/rappers", "GET a list of rappers."}
-    content, _ := json.Marshal(r)
-    w.Write(content)
-}
+func Router() *mux.Router{
+    router := mux.NewRouter()
+    router.Handle("/api/v1/user/new", AnonymousApiHandler(user.UserRegistrationHandler)).Name("user_registration")
+    router.Handle("/api/v1/user/login", AnonymousApiHandler(user.UserAuthHandler)).Name("user_authenticate")
+    router.Handle("/api/v1/user/{user_id:[0-9]+}", AuthApiHandler(user.UserIdHandler)).Name("user_id")
+    router.Handle("/api/v1/rapper/", AnonymousApiHandler(rapper.RapperHandler)).Name("rapper")
 
-func handleRappers(rwriter http.ResponseWriter, request *http.Request) {
-    guc := &rapper.Rapper{"Gucci Mane"}
-    json.NewEncoder(rwriter).Encode(guc)
-    rwriter.Header().Set("Content-Type:", "application/json")
-}   
+    return router
+}
 
 func main() {
-    logwriter, e := syslog.New(syslog.LOG_NOTICE, "go_log")
-    if e != nil {
-        fmt.Println("Hey Syslog")
+    logwriter, _ := syslog.New(syslog.LOG_NOTICE, "go_log")
+    http.Handle("/", Router())
+
+    if err := http.ListenAndServe(*port, nil); err != nil {
         log.SetOutput(logwriter)
+        log.Fatal(err)
     }
-    http.HandleFunc("/", handleIndex)
-    http.HandleFunc("/rappers", handleRappers)
-    http.ListenAndServe(":8080", nil)
 }
