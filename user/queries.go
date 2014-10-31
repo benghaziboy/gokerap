@@ -5,7 +5,8 @@ const (
 	CREATE TABLE users (
 		id         SERIAL PRIMARY KEY,
 		email      VARCHAR UNIQUE,
-		password   VARCHAR
+		password   VARCHAR, 
+		is_admin   BOOLEAN
 	)
 	`
 

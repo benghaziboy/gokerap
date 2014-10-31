@@ -13,6 +13,7 @@ type User struct {
 	Id       int    `json:"id"`
 	Email    string `json:"email"`
 	Password []byte `json:"-"`
+	IsAdmin  bool   `json:"bool"`
 	Token    string `json:"token,omitempty"`
 }
 
@@ -42,7 +43,7 @@ func New(email, password string) (*User, error) {
 func Find(id int) (*User, error) {
 	u := User{}
 	err := db.Conn.QueryRow(getUser, id).Scan(
-		&u.Id, &u.Email, &u.Password)
+		&u.Id, &u.Email, &u.Password, &u.IsAdmin)
 
 	return &u, err
 }

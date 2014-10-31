@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-RUN apt-get update
+RUN apt-get update -qq
 RUN apt-get install -y curl git bzr mercurial
 
 RUN curl -s https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz | tar -v -C /usr/local/ -xz
